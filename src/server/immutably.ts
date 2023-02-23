@@ -36,12 +36,23 @@ export default defineEventHandler(async (event) => {
     'X-CXL-Application': String(options.consumerKey),
     ...oauth.toHeader(oauth.authorize(requestData))
   }
-  return ofetch(requestData.url, {
-    baseURL: options.baseUrl,
-    body: JSON.stringify(data),
-    headers,
-    method,
-  }).catch(e => {
-    throw e.response;
-  });
+  try {
+    const tokens = await $fetch(requestData.url, {
+      baseURL: options.baseUrl,
+      body: JSON.stringify(data),
+      headers,
+      method: "POST",
+    })
+    return { accessToken: tokens['access-token'] };
+  } catch (e) {
+    let message = 'Something went wrong';
+    if (e.response?.status === 401) {
+      message = 'Please try again'
+    }
+    throw createError({
+      message,
+      stack: undefined,
+      statusCode: 401,
+    });
+  }
 });

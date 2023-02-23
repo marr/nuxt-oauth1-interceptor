@@ -1,4 +1,5 @@
-const user = ref(null)
+const user = ref(null);
+
 export default () => {
   function setUser(u) {
     user.value = u;
